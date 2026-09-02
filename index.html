@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Holy Spirit 365</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --primary: #4f46e5;
+      --muted: #64748b;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .day-badge {
+      background: var(--primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+    .scripture {
+      font-style: italic;
+      color: #334155;
+      border-left: 4px solid var(--primary);
+      padding-left: 12px;
+      margin: 12px 0;
+    }
+    .reference {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: right;
+    }
+    h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+      color: var(--primary);
+    }
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .tag {
+      background: #e0e7ff;
+      color: var(--primary);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="day-badge" id="dayNumber">Day --</div>
+    <h1 id="title">Loading...</h1>
+  </header>
+
+  <div class="card">
+    <h2>Daily Scripture</h2>
+    <div class="scripture" id="scripture">...</div>
+    <div class="reference" id="reference"></div>
+  </div>
+
+  <div class="card">
+    <h2>Devotional</h2>
+    <p id="devotional">...</p>
+  </div>
+
+  <div class="card">
+    <h2>Prayer</h2>
+    <p id="prayer">...</p>
+  </div>
+
+  <div class="card">
+    <h2>Action Step</h2>
+    <p id="actionStep">...</p>
+    <div class="tags" id="tags"></div>
+  </div>
+</div>
+
+<script>
+  // Calculate current day of the year (1 - 365)
+  function getDayOfYear() {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
+  }
+
+  async function loadDailyContent() {
+    const currentDay = getDayOfYear();
+    
+    try {
+      const response = await fetch('data.json');
+      const data = await response.json();
+      
+      // Find today's record or default to day 1
+      const todayData = data.find(item => item.day === currentDay) || data[0];
+
+      document.getElementById('dayNumber').textContent = `Day ${todayData.day} of 365`;
+      document.getElementById('title').textContent = todayData.title;
+      document.getElementById('scripture').textContent = `"${todayData.scripture}"`;
+      document.getElementById('reference').textContent = `— ${todayData.reference}`;
+      document.getElementById('devotional').textContent = todayData.devotional;
+      document.getElementById('prayer').textContent = todayData.prayer;
+      document.getElementById('actionStep').textContent = todayData.actionStep;
+
+      const tagsContainer = document.getElementById('tags');
+      tagsContainer.innerHTML = '';
+      if (todayData.tags) {
+        todayData.tags.forEach(tag => {
+          const span = document.createElement('span');
+          span.className = 'tag';
+          span.textContent = `#${tag}`;
+          tagsContainer.appendChild(span);
+        });
+      }
+    } catch (error) {
+      document.getElementById('title').textContent = 'Error loading content';
+      console.error('Data fetch error:', error);
+    }
+  }
+
+  loadDailyContent();
+</script>
+
+</body>
+</html>
